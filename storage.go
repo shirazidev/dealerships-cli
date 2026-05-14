@@ -47,6 +47,9 @@ func loadDealerships(region string) ([]Dealership, error) {
 }
 func saveDealerships(region string, dealerships []Dealership) error {
 	path := getFilePath(region)
+	if err := os.MkdirAll("data", os.ModePerm); err != nil {
+		return err
+	}
 	file, err := os.Create(path)
 	if err != nil {
 		return err
