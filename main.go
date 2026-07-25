@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bufio"
+	"dealerships-cli/handler"
 	"flag"
 	"fmt"
 	"os"
@@ -11,25 +13,44 @@ func main() {
 	region := flag.String("region", "", "Region name e.g. tehran, isfahan, shiraz")
 	flag.Parse()
 
-	if *command == "" || *region == "" {
-		fmt.Println("Usage: ./dealership-cli -command=<cmd> -region=<region>")
-		fmt.Println("Commands: list, get, create, edit, status")
-		os.Exit(1)
+	if *command != "" && *region != "" {
+		runCommand(*command, *region)
+	} else {
+		for {
+
+			fmt.Println("Enter command (list, get, create, edit, status) or 'exit' to quit:")
+			scanner := bufio.NewScanner(os.Stdin)
+			scanner.Scan()
+			*command = scanner.Text()
+			if *command == "exit" || *command == "quit" {
+				break
+			}
+			fmt.Println("Enter region (e.g., tehran, isfahan, shiraz):")
+			scanner.Scan()
+			*region = scanner.Text()
+
+			runCommand(*command, *region)
+
+		}
 	}
 
-	switch *command {
+}
+func runCommand(command string, region string) {
+	switch command {
 	case "list":
-		listDealerships(*region)
+		handler.ListDealerships(region)
 	case "get":
-		getDealership(*region)
+		handler.GetDealership(region)
 	case "create":
-		createDealership(*region)
+		handler.CreateDealership(region)
 	case "edit":
-		editDealership(*region)
+		handler.EditDealership(region)
 	case "status":
-		statusDealerships(*region)
+		handler.StatusDealerships(region)
+	case "exit":
+		os.Exit(0)
 	default:
-		fmt.Printf("Unknown command: %s\n", *command)
+		fmt.Printf("Unknown command: %s\n", command)
 		os.Exit(1)
 	}
 }

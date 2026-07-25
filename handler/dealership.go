@@ -1,7 +1,8 @@
-package main
+package handler
 
 import (
 	"bufio"
+	"dealerships-cli/model"
 	"fmt"
 	"log"
 	"os"
@@ -9,16 +10,7 @@ import (
 	"strings"
 )
 
-type Dealership struct {
-	ID             int
-	Name           string
-	Address        string
-	Phone          string
-	MembershipDate string
-	EmployeeCount  int
-}
-
-func readInput(prompt string) string {
+func ReadInput(prompt string) string {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println(prompt)
 	text, _ := reader.ReadString('\n')
@@ -26,14 +18,14 @@ func readInput(prompt string) string {
 
 }
 
-func listDealerships(region string) {
-	dealerships, err := loadDealerships(region)
+func ListDealerships(region string) {
+	dealerships, err := model.LoadDealerships(region)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 	if len(dealerships) == 0 {
-		fmt.Printf("No dealer ships found in region %s\n.", region)
+		fmt.Printf("No dealer ships found in region %s.\n", region)
 		return
 	}
 	fmt.Printf("=== Dealerships in %s ===\n", region)
@@ -41,8 +33,8 @@ func listDealerships(region string) {
 		fmt.Printf("[%d] %s — %s — %s\n", d.ID, d.Name, d.Address, d.Phone)
 	}
 }
-func getDealership(region string) {
-	dealerships, err := loadDealerships(region)
+func GetDealership(region string) {
+	dealerships, err := model.LoadDealerships(region)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -72,8 +64,8 @@ func getDealership(region string) {
 	fmt.Printf("No dealership found with ID %d in %s\n", id, region)
 
 }
-func statusDealerships(region string) {
-	dealerships, err := loadDealerships(region)
+func StatusDealerships(region string) {
+	dealerships, err := model.LoadDealerships(region)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -86,8 +78,8 @@ func statusDealerships(region string) {
 	fmt.Printf("Total dealerships: %d\n", len(dealerships))
 	fmt.Printf("Total employees:   %d\n", totalEmployees)
 }
-func createDealership(region string) {
-	dealerships, err := loadDealerships(region)
+func CreateDealership(region string) {
+	dealerships, err := model.LoadDealerships(region)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -98,18 +90,18 @@ func createDealership(region string) {
 			nextID = d.ID + 1
 		}
 	}
-	name := readInput("Enter your name:")
-	phone := readInput("Enter your phone:")
-	address := readInput("Enter your address:")
-	date := readInput("Enter your dealership date:")
-	empCount := readInput("Enter your dealership employee count:")
+	name := ReadInput("Enter your name:")
+	phone := ReadInput("Enter your phone:")
+	address := ReadInput("Enter your address:")
+	date := ReadInput("Enter your dealership date:")
+	empCount := ReadInput("Enter your dealership employee count:")
 
 	empCountInt, err := strconv.Atoi(empCount)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	newDealership := Dealership{
+	newDealership := model.Dealership{
 		ID:             nextID,
 		Name:           name,
 		Address:        address,
@@ -118,19 +110,19 @@ func createDealership(region string) {
 		EmployeeCount:  empCountInt,
 	}
 	dealerships = append(dealerships, newDealership)
-	if err := saveDealerships(region, dealerships); err != nil {
+	if err := model.SaveDealerships(region, dealerships); err != nil {
 		log.Fatal(err)
 		return
 	}
 	fmt.Printf("✅ Dealership created with ID %d in %s\n", nextID, region)
 }
-func editDealership(region string) {
-	dealerships, err := loadDealerships(region)
+func EditDealership(region string) {
+	dealerships, err := model.LoadDealerships(region)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	idStr := readInput("Enter your ID:")
+	idStr := ReadInput("Enter your ID:")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		fmt.Println("Invalid ID. Please enter a number.")
@@ -150,19 +142,19 @@ func editDealership(region string) {
 	d := dealerships[index]
 	fmt.Printf("Editing dealership [%d] %s\n", d.ID, d.Name)
 	fmt.Println("Press Enter to keep current value")
-	if input := readInput(fmt.Sprintf("Name (%s):", d.Name)); input != "" {
+	if input := ReadInput(fmt.Sprintf("Name (%s):", d.Name)); input != "" {
 		d.Name = input
 	}
-	if input := readInput(fmt.Sprintf("Address (%s):", d.Address)); input != "" {
+	if input := ReadInput(fmt.Sprintf("Address (%s):", d.Address)); input != "" {
 		d.Address = input
 	}
-	if input := readInput(fmt.Sprintf("Phone (%s):", d.Phone)); input != "" {
+	if input := ReadInput(fmt.Sprintf("Phone (%s):", d.Phone)); input != "" {
 		d.Phone = input
 	}
-	if input := readInput(fmt.Sprintf("Name (%s):", d.MembershipDate)); input != "" {
+	if input := ReadInput(fmt.Sprintf("Name (%s):", d.MembershipDate)); input != "" {
 		d.MembershipDate = input
 	}
-	if input := readInput(fmt.Sprintf("Employees count (%d):", d.EmployeeCount)); input != "" {
+	if input := ReadInput(fmt.Sprintf("Employees count (%d):", d.EmployeeCount)); input != "" {
 		empCount, err := strconv.Atoi(input)
 		if err != nil {
 			log.Fatal(err)
@@ -171,7 +163,7 @@ func editDealership(region string) {
 		d.EmployeeCount = empCount
 	}
 	dealerships[index] = d
-	if err := saveDealerships(region, dealerships); err != nil {
+	if err := model.SaveDealerships(region, dealerships); err != nil {
 		log.Fatal(err)
 		return
 	}

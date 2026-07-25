@@ -1,17 +1,18 @@
-package main
+package model
 
 import (
 	"encoding/csv"
+	"fmt"
 	"os"
 	"strconv"
 )
 
-func getFilePath(region string) string {
+func GetFilePath(region string) string {
 	return "data/" + region + ".csv"
 }
 
-func loadDealerships(region string) ([]Dealership, error) {
-	path := getFilePath(region)
+func LoadDealerships(region string) ([]Dealership, error) {
+	path := GetFilePath(region)
 
 	file, err := os.Open(path)
 	if err != nil {
@@ -20,7 +21,12 @@ func loadDealerships(region string) ([]Dealership, error) {
 		}
 		return nil, err
 	}
-	defer file.Close()
+	defer func() {
+		err := file.Close()
+		if err != nil {
+			fmt.Printf("Error closing file: %s\n", err)
+		}
+	}()
 
 	reader := csv.NewReader(file)
 
@@ -45,8 +51,8 @@ func loadDealerships(region string) ([]Dealership, error) {
 	}
 	return dealerships, nil
 }
-func saveDealerships(region string, dealerships []Dealership) error {
-	path := getFilePath(region)
+func SaveDealerships(region string, dealerships []Dealership) error {
+	path := GetFilePath(region)
 	if err := os.MkdirAll("data", os.ModePerm); err != nil {
 		return err
 	}
@@ -54,7 +60,12 @@ func saveDealerships(region string, dealerships []Dealership) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() {
+		err := file.Close()
+		if err != nil {
+			fmt.Printf("Error closing file: %s\n", err)
+		}
+	}()
 
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
