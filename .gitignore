@@ -2,3 +2,5 @@
 .idea
 dealerships-cli
 /dealerships-cli-x64.exe
+.DS_Store
+go.sum
